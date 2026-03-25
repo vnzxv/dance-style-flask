@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Results — Dance Style Predictor</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #0d0f1a; color: #e8eaf6; min-height: 100vh; }
+
+    nav {
+      background: #13162a; border-bottom: 2px solid #2a2f52;
+      padding: 0 2.5rem; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 10;
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    }
+    .nav-brand { font-weight: 800; font-size: 1.15rem; color: #4ecdc4; }
+    .nav-links a { color: #8892b0; text-decoration: none; margin-left: 2rem; font-size: .92rem; font-weight: 500; }
+    .nav-links a:hover, .nav-links a.active { color: #4ecdc4; }
+
+    .page { max-width: 900px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+
+    .page-header { text-align: center; margin-bottom: 2rem; }
+    .page-header h1 { font-size: 1.9rem; font-weight: 800; margin-bottom: .4rem; }
+    .page-header p  { color: #8892b0; font-size: .93rem; margin-bottom: .8rem; }
+    .student-tag {
+      display: inline-block; background: rgba(78,205,196,.1); border: 1px solid rgba(78,205,196,.3);
+      color: #4ecdc4; border-radius: 50px; padding: .25rem .95rem;
+      font-size: .78rem; font-weight: 600;
+    }
+
+    /* Best model banner */
+    .best-box {
+      background: #1e2240; border: 1.5px solid rgba(5,168,122,.4); border-left: 5px solid #05a87a;
+      border-radius: 16px; padding: 1.5rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1.2rem; margin-bottom: 1.5rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,.3);
+    }
+    .best-left { display: flex; align-items: center; gap: 1rem; }
+    .best-crown { font-size: 2.2rem; }
+    .best-lbl  { font-size: .72rem; color: #8892b0; text-transform: uppercase; letter-spacing: .07em; }
+    .best-name { font-size: 1.35rem; font-weight: 800; color: #05a87a; }
+    .best-stats { display: flex; gap: 2rem; }
+    .bs-val { font-size: 1.25rem; font-weight: 800; color: #05a87a; }
+    .bs-lbl { font-size: .71rem; color: #8892b0; margin-top: .1rem; }
+
+    /* Why this model */
+    .why-box {
+      background: #13162a; border: 1px solid #2a2f52; border-radius: 14px;
+      padding: 1.3rem 1.5rem; margin-bottom: 2rem;
+    }
+    .why-box h3 { font-size: .95rem; font-weight: 700; margin-bottom: .5rem; color: #4ecdc4; }
+    .why-box p  { font-size: .86rem; color: #8892b0; line-height: 1.65; }
+
+    /* Table */
+    h2.sub { font-size: 1.1rem; font-weight: 700; margin-bottom: .85rem; color: #e8eaf6; }
+    .table-wrap {
+      background: #1e2240; border: 1px solid #2a2f52; border-radius: 14px;
+      overflow-x: auto; margin-bottom: 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: .87rem; }
+    th {
+      background: #13162a; color: #8892b0; font-weight: 600;
+      padding: .78rem 1rem; text-align: left; border-bottom: 1px solid #2a2f52;
+      font-size: .82rem; text-transform: uppercase; letter-spacing: .04em;
+    }
+    td { padding: .72rem 1rem; border-bottom: 1px solid #1a1d35; color: #c8cce8; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,.03); }
+    .row-best td { background: rgba(6,214,160,.06) !important; }
+    .row-best td:first-child strong { color: #05a87a; }
+
+    .bar-wrap { display: flex; flex-direction: column; gap: .22rem; }
+    .mini { height: 4px; background: #2a2f52; border-radius: 2px; overflow: hidden; }
+    .mini div { height: 100%; background: #4ecdc4; border-radius: 2px; }
+
+    .badge { display: inline-block; padding: .2rem .65rem; border-radius: 50px; font-size: .72rem; font-weight: 600; }
+    .b-best  { background: rgba(5,168,122,.2); color: #05a87a; }
+    .b-plain { background: rgba(136,146,176,.12); color: #8892b0; }
+
+    /* Model cards */
+    .models-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1rem; margin-bottom: 2rem;
+    }
+    @media (max-width: 800px) { .models-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 500px) { .models-grid { grid-template-columns: 1fr; } }
+    .model-card {
+      background: #1e2240; border: 1px solid #2a2f52; border-radius: 12px;
+      padding: 1.2rem; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+    }
+    .model-card.is-best { border-color: rgba(5,168,122,.4); border-left: 4px solid #05a87a; }
+    .model-card h4 { font-size: .9rem; font-weight: 700; margin-bottom: .35rem; color: #e8eaf6; }
+    .model-card p  { font-size: .8rem; color: #8892b0; line-height: 1.6; }
+    .model-rank {
+      display: inline-block; font-size: .7rem; font-weight: 700;
+      border-radius: 4px; padding: .1rem .45rem; margin-bottom: .4rem;
+    }
+    .rank-best { background: rgba(5,168,122,.2);  color: #05a87a; }
+    .rank-mid  { background: rgba(78,205,196,.15); color: #4ecdc4; }
+    .rank-low  { background: rgba(136,146,176,.15); color: #8892b0; }
+
+    /* Accuracy bar visual */
+    .acc-visual { margin-top: .8rem; }
+    .acc-label  { display: flex; justify-content: space-between; font-size: .75rem; color: #8892b0; margin-bottom: .25rem; }
+    .acc-track  { height: 8px; background: #2a2f52; border-radius: 4px; overflow: hidden; }
+    .acc-fill   { height: 100%; border-radius: 4px; }
+
+    .no-data {
+      background: rgba(255,107,107,.08); border: 1px solid rgba(255,107,107,.3);
+      border-radius: 12px; padding: 1.2rem; color: #ff6b6b; font-size: .88rem;
+    }
+
+    code {
+      background: #13162a; padding: .1em .35em; border-radius: 4px;
+      font-size: .84em; color: #4ecdc4;
+    }
+
+    footer {
+      text-align: center; padding: 1.5rem;
+      border-top: 1px solid #2a2f52; color: #6a7490;
+      font-size: .82rem; background: #13162a; margin-top: 2rem;
+    }
+    footer strong { color: #e8eaf6; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">🎵 CS191-3P</div>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/predict">Predict</a>
+    <a href="/results" class="active">Results</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <h1>📊 Model Results</h1>
+    <p>Three classifiers were trained and compared. The best model was selected by test accuracy and F1 score.</p>
+    <span class="student-tag">👤 Velandres &nbsp;|&nbsp; C191-3P &nbsp;|&nbsp; CIS302</span>
+  </div>
+
+  {% if rows %}
+  {% set bm = rows[best] if best in rows else {} %}
+
+  <!-- BEST MODEL -->
+  <div class="best-box">
+    <div class="best-left">
+      <span class="best-crown">🏆</span>
+      <div>
+        <div class="best-lbl">Selected Model</div>
+        <div class="best-name">{{ best }}</div>
+      </div>
+    </div>
+    {% if bm %}
+    <div class="best-stats">
+      <div><div class="bs-val">{{ "%.2f"|format(bm.test_acc*100) }}%</div><div class="bs-lbl">Test Accuracy</div></div>
+      <div><div class="bs-val">{{ "%.4f"|format(bm.f1_macro) }}</div><div class="bs-lbl">F1 Macro</div></div>
+      <div><div class="bs-val">{{ "%.4f"|format(bm.cv_mean) }}</div><div class="bs-lbl">CV Accuracy</div></div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- WHY THIS MODEL -->
+  <div class="why-box">
+    <h3>💡 Why was {{ best }} selected?</h3>
+    <p>
+      Three models were evaluated on the same test set (20% of the data) using Test Accuracy and F1 Macro Score.
+      <strong style="color:#e8eaf6">{{ best }}</strong> achieved the highest accuracy among all three models tested —
+      meaning it correctly classified the most dance styles while performing consistently across all six classes.
+      It was selected because it handles non-linear relationships between audio features and dance styles
+      better than simpler models.
+    </p>
+  </div>
+
+  <!-- COMPARISON TABLE -->
+  <h2 class="sub">Model Comparison</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>CV Accuracy</th>
+          <th>± Std</th>
+          <th>Test Accuracy</th>
+          <th>F1 Macro</th>
+          <th>F1 Weighted</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for name, m in rows.items() %}
+        <tr class="{{ 'row-best' if name == best else '' }}">
+          <td><strong>{{ name }}</strong></td>
+          <td>{{ "%.4f"|format(m.cv_mean) }}</td>
+          <td>{{ "%.4f"|format(m.cv_std) }}</td>
+          <td>
+            <div class="bar-wrap">
+              <span>{{ "%.4f"|format(m.test_acc) }}</span>
+              <div class="mini"><div style="width:{{ m.test_acc*100 }}%"></div></div>
+            </div>
+          </td>
+          <td>{{ "%.4f"|format(m.f1_macro) }}</td>
+          <td>{{ "%.4f"|format(m.f1_weighted) }}</td>
+          <td>
+            {% if name == best %}
+            <span class="badge b-best">★ Best</span>
+            {% else %}
+            <span class="badge b-plain">Tested</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% else %}
+  <div class="no-data">
+    ⚠️ No results found. Add <code>model_results.json</code> to the same folder as <code>app.py</code>.
+  </div>
+  {% endif %}
+
+  <!-- 3 MODEL CARDS -->
+  <h2 class="sub">Models Compared</h2>
+  <div class="models-grid">
+
+    <div class="model-card {% if best == 'Naive Bayes' %}is-best{% endif %}">
+      <div class="model-rank rank-low">Baseline</div>
+      <h4>Naive Bayes</h4>
+      <p>Simplest model. Uses probability and assumes all features are independent. Fast but limited when features are correlated.</p>
+      {% if rows and 'Naive Bayes' in rows %}
+      <div class="acc-visual">
+        <div class="acc-label"><span>Test Accuracy</span><span>{{ "%.1f"|format(rows['Naive Bayes'].test_acc*100) }}%</span></div>
+        <div class="acc-track"><div class="acc-fill" style="width:{{ rows['Naive Bayes'].test_acc*100 }}%; background:#8892b0"></div></div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="model-card {% if best == 'Logistic Regression' %}is-best{% endif %}">
+      <div class="model-rank rank-low">Linear</div>
+      <h4>Logistic Regression</h4>
+      <p>Finds a straight-line boundary between classes. Standard linear baseline — better than Naive Bayes but limited for complex patterns.</p>
+      {% if rows and 'Logistic Regression' in rows %}
+      <div class="acc-visual">
+        <div class="acc-label"><span>Test Accuracy</span><span>{{ "%.1f"|format(rows['Logistic Regression'].test_acc*100) }}%</span></div>
+        <div class="acc-track"><div class="acc-fill" style="width:{{ rows['Logistic Regression'].test_acc*100 }}%; background:#4ecdc4"></div></div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="model-card {% if best == 'Random Forest' %}is-best{% endif %}">
+      <div class="model-rank rank-best">✓ Selected</div>
+      <h4>Random Forest</h4>
+      <p>Builds many decision trees and takes the majority vote. Handles non-linear data well and works best for multi-class problems.</p>
+      {% if rows and 'Random Forest' in rows %}
+      <div class="acc-visual">
+        <div class="acc-label"><span>Test Accuracy</span><span>{{ "%.1f"|format(rows['Random Forest'].test_acc*100) }}%</span></div>
+        <div class="acc-track"><div class="acc-fill" style="width:{{ rows['Random Forest'].test_acc*100 }}%; background:#05a87a"></div></div>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+</div>
+
+<footer>
+  <strong>Velandres</strong> &nbsp;·&nbsp; C191-3P &nbsp;·&nbsp; CIS302
+</footer>
+
+</body>
+</html>
