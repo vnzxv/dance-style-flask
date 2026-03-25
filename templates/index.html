@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dance Style Predictor</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0d0f1a;
+      color: #e8eaf6;
+      min-height: 100vh;
+    }
+
+    nav {
+      background: #13162a;
+      border-bottom: 1px solid #2a2f52;
+      padding: 0 2rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-brand { font-weight: 700; font-size: 1.1rem; }
+    .nav-links a {
+      color: #8892b0;
+      text-decoration: none;
+      margin-left: 1.8rem;
+      font-size: .92rem;
+      font-weight: 500;
+    }
+    .nav-links a:hover, .nav-links a.active { color: #4ecdc4; }
+
+    .hero {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 80px 2rem 60px;
+      text-align: center;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(124,108,252,.15);
+      border: 1px solid rgba(124,108,252,.4);
+      color: #b3aeff;
+      padding: .3rem 1rem;
+      border-radius: 50px;
+      font-size: .8rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+    h1 {
+      font-size: 2.6rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+    }
+    .gradient { background: linear-gradient(135deg,#7c6cfc,#4ecdc4); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .sub { color: #8892b0; font-size: 1rem; margin-bottom: 1.8rem; }
+    .meta { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
+    .chip { background: #1e2240; border: 1px solid #2a2f52; border-radius: 50px; padding: .3rem .9rem; font-size: .83rem; }
+    .btns { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+    .btn {
+      padding: .7rem 1.8rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: .92rem;
+      text-decoration: none;
+      transition: all .2s;
+    }
+    .btn-primary { background: #7c6cfc; color: #fff; }
+    .btn-primary:hover { background: #6a5ce8; }
+    .btn-outline { border: 1.5px solid #2a2f52; color: #e8eaf6; }
+    .btn-outline:hover { border-color: #4ecdc4; color: #4ecdc4; }
+
+    .stats {
+      background: #13162a;
+      border-top: 1px solid #2a2f52;
+      border-bottom: 1px solid #2a2f52;
+      padding: 1.8rem 2rem;
+    }
+    .stats-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .stat { text-align: center; }
+    .stat-num { font-size: 1.8rem; font-weight: 800; color: #4ecdc4; }
+    .stat-lbl { font-size: .75rem; color: #8892b0; margin-top: .2rem; }
+
+    .section { max-width: 900px; margin: 0 auto; padding: 3.5rem 2rem; }
+    .section h2 { font-size: 1.5rem; font-weight: 700; text-align: center; margin-bottom: .6rem; }
+    .section-sub { text-align: center; color: #8892b0; margin-bottom: 2rem; font-size: .93rem; }
+
+    .dance-grid { 
+      display: grid; 
+      grid-template-columns: repeat(3, 1fr); 
+      gap: 1rem; 
+    }
+
+    .dance-card {
+      background: #1e2240;
+      border: 1.5px solid #2a2f52;
+      border-top: 3px solid var(--accent);
+      border-radius: 12px;
+      padding: 1.3rem 1rem;
+      text-align: center;
+      transition: transform .2s;
+    }
+    .dance-card:hover { transform: translateY(-3px); }
+    .dance-card .emoji { font-size: 1.8rem; margin-bottom: .5rem; }
+    .dance-card h3 { font-size: .92rem; font-weight: 700; margin-bottom: .3rem; }
+    .dance-card p  { font-size: .78rem; color: #8892b0; }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      border-top: 1px solid #2a2f52;
+      color: #8892b0;
+      font-size: .82rem;
+    }
+    footer strong { color: #e8eaf6; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">🎵 CS191-3P</div>
+  <div class="nav-links">
+    <a href="/" class="active">Home</a>
+    <a href="/predict">Predict</a>
+    <a href="/results">Results</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>Predict Dance Style<br/><span class="gradient">from Song Features</span></h1>
+  <p class="sub">Enter Spotify audio features and let the model predict the best-fitting dance style for any song.</p>
+  <div class="btns">
+    <a href="/predict" class="btn btn-primary">🎯 Try Prediction</a>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stats-inner">
+    <div class="stat"><div class="stat-num">9</div><div class="stat-lbl">Audio Features</div></div>
+    <div class="stat"><div class="stat-num">6</div><div class="stat-lbl">Dance Styles</div></div>
+    <div class="stat"><div class="stat-num">{{ model_acc }}</div><div class="stat-lbl">Best Accuracy</div></div>
+    <div class="stat"><div class="stat-num" style="font-size:1rem;padding-top:.4rem">{{ model_name }}</div><div class="stat-lbl">Selected Model</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>6 Dance Styles</h2>
+  <p class="section-sub">The model classifies songs into one of these six dance categories.</p>
+  <div class="dance-grid">
+    {% for style, info in dance_info.items() %}
+    <div class="dance-card" style="--accent: {{ info.color }}">
+      <div class="emoji">{{ info.emoji }}</div>
+      <h3>{{ style }}</h3>
+      <p>{{ info.desc }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<footer>
+  <strong>Velandres</strong> &nbsp;·&nbsp; Section C191-3P &nbsp;·&nbsp; CIS302 
+</footer>
+
+</body>
+</html>
