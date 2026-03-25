@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Predict — Dance Style Predictor</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0d0f1a;
+      color: #e8eaf6;
+      min-height: 100vh;
+    }
+
+    nav {
+      background: #13162a;
+      border-bottom: 1px solid #2a2f52;
+      padding: 0 2rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-brand { font-weight: 700; font-size: 1.1rem; }
+    .nav-links a {
+      color: #8892b0; text-decoration: none;
+      margin-left: 1.8rem; font-size: .92rem; font-weight: 500;
+    }
+    .nav-links a:hover, .nav-links a.active { color: #4ecdc4; }
+
+    .page { max-width: 1000px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+
+    .page-header { text-align: center; margin-bottom: 2rem; }
+    .page-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: .4rem; }
+    .page-header p  { color: #8892b0; font-size: .93rem; margin-bottom: .8rem; }
+    .student-tag {
+      display: inline-block;
+      background: rgba(78,205,196,.1); border: 1px solid rgba(78,205,196,.3);
+      color: #4ecdc4; border-radius: 50px; padding: .25rem .9rem; font-size: .78rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    @media (max-width: 720px) { .layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: #1e2240;
+      border: 1px solid #2a2f52;
+      border-radius: 12px;
+      padding: 1.6rem;
+    }
+    .card h2 { font-size: 1rem; font-weight: 700; margin-bottom: 1.2rem; }
+
+    /* Sliders */
+    .feat { margin-bottom: 1rem; }
+    .feat-top { display: flex; align-items: center; margin-bottom: .28rem; }
+    .feat-top label { flex: 1; font-size: .85rem; font-weight: 600; }
+    .feat-unit { font-size: .7rem; color: #8892b0; background: #13162a; padding: .1rem .4rem; border-radius: 4px; margin-right: .4rem; }
+    .feat-val  { font-size: .85rem; font-weight: 700; color: #4ecdc4; min-width: 44px; text-align: right; }
+    input[type=range] {
+      -webkit-appearance: none; width: 100%; height: 4px;
+      border-radius: 2px; background: #2a2f52; outline: none; cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 14px; height: 14px;
+      border-radius: 50%; background: #7c6cfc; cursor: pointer;
+    }
+    .range-ends { display: flex; justify-content: space-between; font-size: .67rem; color: #8892b0; margin-top: 1px; }
+
+    .btn-submit {
+      width: 100%; margin-top: 1.2rem; padding: .85rem;
+      background: #7c6cfc; color: #fff;
+      border: none; border-radius: 50px;
+      font-size: .95rem; font-weight: 700; cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-submit:hover { background: #6a5ce8; }
+
+    /* Result */
+    .result-card {
+      border: 2px solid var(--accent, #7c6cfc);
+      border-radius: 12px;
+      padding: 1.8rem;
+      text-align: center;
+      background: #1e2240;
+    }
+    .result-emoji { font-size: 3rem; margin-bottom: .4rem; }
+    .result-lbl   { font-size: .75rem; color: #8892b0; text-transform: uppercase; letter-spacing: .08em; }
+    .result-style { font-size: 1.8rem; font-weight: 800; margin: .25rem 0; }
+    .result-desc  { font-size: .85rem; color: #8892b0; margin-bottom: 1.2rem; }
+
+    .conf-header { display: flex; justify-content: space-between; font-size: .82rem; margin-bottom: .35rem; }
+    .conf-track  { height: 6px; background: #13162a; border-radius: 3px; overflow: hidden; margin-bottom: 1.2rem; }
+    .conf-fill   { height: 100%; border-radius: 3px; }
+
+    .prob-title { font-size: .8rem; color: #8892b0; margin-bottom: .6rem; text-align: left; }
+    .prob-row   { display: flex; align-items: center; gap: .5rem; margin-bottom: .4rem; }
+    .prob-lbl   { font-size: .78rem; width: 105px; flex-shrink: 0; text-align: left; }
+    .prob-track { flex: 1; height: 5px; background: #13162a; border-radius: 3px; overflow: hidden; }
+    .prob-fill  { height: 100%; border-radius: 3px; }
+    .prob-pct   { font-size: .74rem; font-weight: 600; width: 36px; text-align: right; }
+
+    .placeholder {
+      border: 1px dashed #2a2f52;
+      border-radius: 12px; padding: 2.5rem;
+      text-align: center; background: #1e2240;
+    }
+    .placeholder .icon { font-size: 2.5rem; opacity: .3; margin-bottom: .7rem; }
+    .placeholder h3 { font-size: 1rem; color: #8892b0; margin-bottom: .4rem; }
+    .placeholder p  { font-size: .85rem; color: #8892b0; }
+
+    .tip-box {
+      background: #13162a; border-radius: 8px;
+      padding: .8rem 1rem; margin-top: 1rem;
+      font-size: .8rem; text-align: left;
+    }
+    .tip-box ul { padding-left: 1.1rem; color: #8892b0; margin-top: .4rem; }
+    .tip-box li { margin-bottom: .25rem; }
+
+    .ref { background: #1e2240; border: 1px solid #2a2f52; border-radius: 12px; padding: 1rem; }
+    .ref h4 { font-size: .8rem; color: #8892b0; margin-bottom: .6rem; }
+    .ref-row { display: flex; justify-content: space-between; align-items: center; font-size: .82rem; margin-bottom: .35rem; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; }
+
+    .err { background: rgba(255,107,107,.08); border: 1px solid #ff6b6b; border-radius: 12px; padding: 1rem; color: #ff6b6b; font-size: .88rem; }
+
+    footer { text-align: center; padding: 1.5rem; border-top: 1px solid #2a2f52; color: #8892b0; font-size: .82rem; }
+    footer strong { color: #e8eaf6; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">🎵 CS191-3P</div>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/predict" class="active">Predict</a>
+    <a href="/results">Results</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <h1>🎯 Dance Style Predictor</h1>
+    <p>Adjust the sliders to match your song's audio features, then click Predict.</p>
+  </div>
+
+  <div class="layout">
+
+    <!-- FORM -->
+    <div class="card">
+      <h2>🎶 Song Audio Features</h2>
+      <form method="POST" action="/predict">
+        {% for feat, meta in feature_ranges.items() %}
+        <div class="feat">
+          <div class="feat-top">
+            <label for="{{ feat }}">{{ meta.label }}</label>
+            <span class="feat-unit">{{ meta.unit }}</span>
+            <span class="feat-val" id="v_{{ feat }}">{{ "%.2f"|format(form_values[feat]) }}</span>
+          </div>
+          <input type="range" id="{{ feat }}" name="{{ feat }}"
+                 min="{{ meta.min }}" max="{{ meta.max }}" step="{{ meta.step }}"
+                 value="{{ form_values[feat] }}"
+                 oninput="document.getElementById('v_{{ feat }}').textContent=parseFloat(this.value).toFixed(2)"/>
+          <div class="range-ends"><span>{{ meta.min }}</span><span>{{ meta.max }}</span></div>
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn-submit">Predict Dance Style</button>
+      </form>
+    </div>
+
+    <!-- RESULT -->
+    <div style="display:flex; flex-direction:column; gap:1rem;">
+
+      {% if prediction %}
+        {% if "Error" in prediction or "⚠" in prediction %}
+        <div class="err">{{ prediction }}</div>
+        {% else %}
+        {% set info = dance_info.get(prediction, {"emoji":"🎵","color":"#7c6cfc","desc":""}) %}
+        <div class="result-card" style="--accent: {{ info.color }}">
+          <div class="result-emoji">{{ info.emoji }}</div>
+          <div class="result-lbl">Predicted Style</div>
+          <div class="result-style">{{ prediction }}</div>
+          <div class="result-desc">{{ info.desc }}</div>
+
+          {% if confidence %}
+          <div class="conf-header">
+            <span>Confidence</span>
+            <strong style="color:{{ info.color }}">{{ "%.1f"|format(confidence*100) }}%</strong>
+          </div>
+          <div class="conf-track">
+            <div class="conf-fill" style="width:{{ confidence*100 }}%; background:{{ info.color }}"></div>
+          </div>
+          {% endif %}
+
+          {% if all_probs %}
+          <div class="prob-title">All Probabilities</div>
+          {% for cls, prob in all_probs.items() %}
+          {% set ci = dance_info.get(cls, {"emoji":"🎵","color":"#888"}) %}
+          <div class="prob-row">
+            <span class="prob-lbl">{{ ci.emoji }} {{ cls }}</span>
+            <div class="prob-track"><div class="prob-fill" style="width:{{ prob*100 }}%; background:{{ ci.color }}"></div></div>
+            <span class="prob-pct">{{ "%.1f"|format(prob*100) }}%</span>
+          </div>
+          {% endfor %}
+          {% endif %}
+        </div>
+        {% endif %}
+
+      {% else %}
+      <div class="placeholder">
+        <div class="icon">🎵</div>
+        <h3>Awaiting Input</h3>
+        <p>Set the sliders and click <strong>Predict</strong>.</p>
+        <div class="tip-box">
+          <strong>💡 Tips</strong>
+          <ul>
+            <li>High danceability + low acousticness → Hip Hop</li>
+            <li>Low tempo + high acousticness → Ballet</li>
+            <li>High valence + ~120 BPM → Salsa</li>
+            <li>High energy + high tempo → Breaking</li>
+          </ul>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="ref">
+        <h4>Dance Style Reference</h4>
+        {% for style, info in dance_info.items() %}
+        <div class="ref-row">
+          <span>{{ info.emoji }} {{ style }}</span>
+          <div class="dot" style="background:{{ info.color }}"></div>
+        </div>
+        {% endfor %}
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<footer><strong>Velandres</strong> &nbsp;·&nbsp; C191-3P &nbsp;·&nbsp; CIS302</footer>
+
+</body>
+</html>
